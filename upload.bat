@@ -1,3 +1,3 @@
 @ECHO off
 set file=%1
-"%NXJ_HOME%\nxjupload.bat" out/deployment/%file%.nxj
+"%NXJ_HOME%\bin\nxjupload.bat" out/deployment/%file%.nxj
