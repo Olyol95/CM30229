@@ -7,6 +7,19 @@ package com.bjdody.cm30229;
 public class DirectionUtillity {
     public static Direction InverseDirection(Direction in_dir)
     {
-        return new Direction(in_dir.getValue() * -1);
+        switch (in_dir)
+        {
+            case Forward:
+                return Direction.Backward;
+            case Right:
+                return Direction.Left;
+            case Left:
+                return  Direction.Right;
+            case Backward:
+                return Direction.Forward;
+            default:
+                System.out.println("Unexpected direction in DirectionUtillity:InverseDirection");
+                return Direction.Forward;
+        }
     }
 }

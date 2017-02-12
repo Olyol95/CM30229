@@ -5,6 +5,8 @@ package com.bjdody.cm30229;
  */
 public class BotBrain {
 
+    private Controls BotControls;
+
     //<editor-fold desc="State Control">
     //State Control - State Management
 
@@ -19,12 +21,13 @@ public class BotBrain {
 
     private BotState State;
 
-    public BotBrain(BotState initial_state){
+    public BotBrain(BotState initial_state, Controls in_controls){
         State = initial_state;
+        BotControls = in_controls;
         OnEnter();
     }
 
-    public SwitchState(BotState new_state)
+    public void SwitchState(BotState new_state)
     {
         OnExit();
         State = new_state;
@@ -64,7 +67,11 @@ public class BotBrain {
 
     private void Think_Moving_Forward()
     {
-        //TODO
+        int distance = BotControls.ScanForward();
+        if (distance < 10)
+        {
+            SwitchState(BotState.Collision_Recovery);
+        }
     }
 
     private void Think_Turning_Left_Gradual()
@@ -89,7 +96,8 @@ public class BotBrain {
 
     private void Think_Collision_Recovery()
     {
-        //TODO
+        BotControls.ScanLeft();
+        BotControls.ScanRight();
     }
     //</editor-fold>
 
@@ -124,7 +132,7 @@ public class BotBrain {
 
     private void OnEnter_Moving_Forward()
     {
-        //TODO
+        BotControls.MoveForward();
     }
 
     private void OnEnter_Turning_Left_Gradual()
@@ -184,7 +192,7 @@ public class BotBrain {
 
     private void OnExit_Moving_Forward()
     {
-        //TODO
+        BotControls.Stop();
     }
 
     private void OnExit_Turning_Left_Gradual()
