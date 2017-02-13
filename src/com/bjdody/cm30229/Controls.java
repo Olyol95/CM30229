@@ -78,28 +78,28 @@ public class Controls {
         ,Right
     }
 
-    private Direction CurrentDirection = Direction.Forward;
+    private Direction CurrentDirection = Direction.FORWARD;
 
     public int ScanLeft()
     {
         switch (CurrentDirection)
         {
-            case Forward:
+            case FORWARD:
             {
                 Rotate(-90);
                 break;
             }
-            case Left:
+            case LEFT:
             {
                 //Do nothing
                 break;
             }
-            case Right:
+            case RIGHT:
             {
                 Rotate(-180);
                 break;
             }
-            case Backward:
+            case BACKWARD:
             {
                 Rotate(-270);
                 break;
@@ -107,7 +107,7 @@ public class Controls {
             default: System.out.println("Unexpected direction in Controls:ScanLeft");
         }
 
-        CurrentDirection = Direction.Left;
+        CurrentDirection = Direction.LEFT;
         return Sensor.getDistance();
     }
 
@@ -115,22 +115,22 @@ public class Controls {
     {
         switch (CurrentDirection)
         {
-            case Forward:
+            case FORWARD:
             {
                 Rotate(90);
                 break;
             }
-            case Left:
+            case LEFT:
             {
                 Rotate(180);
                 break;
             }
-            case Right:
+            case RIGHT:
             {
                 //Do nothing
                 break;
             }
-            case Backward:
+            case BACKWARD:
             {
                 Rotate(-90);
                 break;
@@ -138,7 +138,7 @@ public class Controls {
             default: System.out.println("Unexpected direction in Controls:ScanRight");
         }
 
-        CurrentDirection = Direction.Right;
+        CurrentDirection = Direction.RIGHT;
         return Sensor.getDistance();
     }
 
@@ -146,22 +146,22 @@ public class Controls {
     {
         switch (CurrentDirection)
         {
-            case Forward:
+            case FORWARD:
             {
                 //Do nothing
                 break;
             }
-            case Left:
+            case LEFT:
             {
                 Rotate(90);
                 break;
             }
-            case Right:
+            case RIGHT:
             {
                 Rotate(-90);
                 break;
             }
-            case Backward:
+            case BACKWARD:
             {
                 Rotate(-180);
                 break;
@@ -169,7 +169,7 @@ public class Controls {
             default: System.out.println("Unexpected direction in Controls:ScanForward");
         }
 
-        CurrentDirection = Direction.Forward;
+        CurrentDirection = Direction.FORWARD;
         return Sensor.getDistance();
     }
 
@@ -177,22 +177,22 @@ public class Controls {
     {
         switch (CurrentDirection)
         {
-            case Forward:
+            case FORWARD:
             {
                 Rotate(180);
                 break;
             }
-            case Left:
+            case LEFT:
             {
                 Rotate(270);
                 break;
             }
-            case Right:
+            case RIGHT:
             {
                 Rotate(90);
                 break;
             }
-            case Backward:
+            case BACKWARD:
             {
                 //Do nothing
                 break;
@@ -200,7 +200,7 @@ public class Controls {
             default: System.out.println("Unexpected direction in Controls:ScanBackward");
         }
 
-        CurrentDirection = Direction.Backward;
+        CurrentDirection = Direction.BACKWARD;
         return Sensor.getDistance();
     }
 
