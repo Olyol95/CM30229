@@ -11,3 +11,7 @@
 hs_err_pid*
 out/*
 .idea/workspace.xml
+.idea/copyright/*
+.idea/misc.xml
+.idea/compiler.xml
+.idea/codeStyleSettings.xml
