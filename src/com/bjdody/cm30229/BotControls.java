@@ -8,14 +8,16 @@ import lejos.robotics.RegulatedMotor;
 /**
  * Created by Benjamin on 12/02/2017.
  */
-public class Controls {
+public class BotControls {
     public RegulatedMotor LeftWheel;
     public RegulatedMotor RightWheel;
 
     public RegulatedMotor SensorPlatform;
     public UltrasonicSensor Sensor;
 
-    public Controls()
+    private static final int MoveSenseDelay = 40;
+
+    public BotControls()
     {
         LeftWheel = Motor.C;
         RightWheel = Motor.B;
@@ -25,8 +27,8 @@ public class Controls {
         Sensor.continuous();
     }
 
-    //<editor-fold desc="Movement - Controls movement and turning of the robot">
-    //Movement - Controls movement and turning of the robot
+    //<editor-fold desc="Movement - BotControls movement and turning of the robot">
+    //Movement - BotControls movement and turning of the robot
 
     public void MoveForward()
     {
@@ -72,12 +74,6 @@ public class Controls {
 
     //</editor-fold>
 
-    private enum RotationDirection
-    {
-        Left
-        ,Right
-    }
-
     private Direction CurrentDirection = Direction.FORWARD;
 
     public int ScanLeft()
@@ -87,6 +83,7 @@ public class Controls {
             case FORWARD:
             {
                 Rotate(-90);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case LEFT:
@@ -97,14 +94,16 @@ public class Controls {
             case RIGHT:
             {
                 Rotate(-180);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case BACKWARD:
             {
                 Rotate(-270);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
-            default: System.out.println("Unexpected direction in Controls:ScanLeft");
+            default: System.out.println("Unexpected direction in BotControls:ScanLeft");
         }
 
         CurrentDirection = Direction.LEFT;
@@ -118,11 +117,13 @@ public class Controls {
             case FORWARD:
             {
                 Rotate(90);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case LEFT:
             {
                 Rotate(180);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case RIGHT:
@@ -133,9 +134,10 @@ public class Controls {
             case BACKWARD:
             {
                 Rotate(-90);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
-            default: System.out.println("Unexpected direction in Controls:ScanRight");
+            default: System.out.println("Unexpected direction in BotControls:ScanRight");
         }
 
         CurrentDirection = Direction.RIGHT;
@@ -154,19 +156,22 @@ public class Controls {
             case LEFT:
             {
                 Rotate(90);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case RIGHT:
             {
                 Rotate(-90);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case BACKWARD:
             {
                 Rotate(-180);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
-            default: System.out.println("Unexpected direction in Controls:ScanForward");
+            default: System.out.println("Unexpected direction in BotControls:ScanForward");
         }
 
         CurrentDirection = Direction.FORWARD;
@@ -180,16 +185,19 @@ public class Controls {
             case FORWARD:
             {
                 Rotate(180);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case LEFT:
             {
                 Rotate(270);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case RIGHT:
             {
                 Rotate(90);
+                Utility.Wait(MoveSenseDelay);
                 break;
             }
             case BACKWARD:
@@ -197,7 +205,7 @@ public class Controls {
                 //Do nothing
                 break;
             }
-            default: System.out.println("Unexpected direction in Controls:ScanBackward");
+            default: System.out.println("Unexpected direction in BotControls:ScanBackward");
         }
 
         CurrentDirection = Direction.BACKWARD;
