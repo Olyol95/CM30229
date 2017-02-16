@@ -7,11 +7,11 @@ public class Main {
     public static void main( String[] args ) {
         BotControls controls = new BotControls();
         SensorController s_controller = new SensorController(controls);
-        s_controller.run();
+        s_controller.start();
 
         BotBrain brain = new BotBrain(BotBrain.BotState.Moving_Forward, controls, s_controller);
         BrainController b_controller = new BrainController(brain);
-        b_controller.run();
+        b_controller.start();
 
         Button.waitForAnyPress();
         s_controller.Kill();
@@ -23,6 +23,8 @@ public class Main {
         }
 
         controls.MoveForward();
+        controls.Stop();
+        Button.waitForAnyPress();
     }
 
 }

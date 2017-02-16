@@ -23,6 +23,10 @@ public class BotControls {
         RightWheel = Motor.B;
         SensorPlatform = Motor.A;
 
+        LeftWheel.setSpeed( 360 );
+        RightWheel.setSpeed( 360 );
+        SensorPlatform.setSpeed( 720 );
+
         Sensor = new UltrasonicSensor(SensorPort.S3);
         Sensor.continuous();
     }

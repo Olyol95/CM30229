@@ -30,14 +30,16 @@ public class SensorController extends Thread{
         return Finished;
     }
 
-    public void Run()
+    @Override
+    public void run()
     {
         while (!KillFlag)
         {
             left_scan = Controls.ScanLeft();
             front_scan = Controls.ScanForward();
             right_scan = Controls.ScanRight();
-            back_scan = Controls.ScanBackward();
+            front_scan = Controls.ScanForward();
+            //back_scan = Controls.ScanBackward();
         }
         Finished = true;
     }

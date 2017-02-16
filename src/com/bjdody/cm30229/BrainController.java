@@ -26,7 +26,7 @@ public class BrainController extends Thread {
     }
 
     //Just keep thinking...
-    public void Run(){
+    public void run(){
         while (!KillFlag)
         {
             Brain.Think();
