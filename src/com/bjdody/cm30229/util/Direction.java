@@ -1,11 +1,13 @@
-package com.bjdody.cm30229;
+package com.bjdody.cm30229.util;
+
+import com.bjdody.cm30229.async.SensorController;
 
 /**
  *  @author bjd, ody
  *
  *  Class representing a direction of travel
  */
-enum Direction {
+public enum Direction {
 
     FORWARD  ( 0 ),
     RIGHT    ( 1 ),
@@ -65,6 +67,22 @@ enum Direction {
 
     private int getValue() {
         return value;
+    }
+
+    public static Direction fromRotation( int degrees ) {
+        degrees %= 360;
+        if ( Math.abs( degrees ) > SensorController.MAX_ROTATION_ANGLE ) {
+            return Direction.BACKWARD;
+        } else {
+            double discriminationAngle = SensorController.MAX_ROTATION_ANGLE * ( 1.0 / 3.0 );
+            if ( degrees < -discriminationAngle ) {
+                return Direction.LEFT;
+            } else if ( degrees > discriminationAngle ) {
+                return Direction.RIGHT;
+            } else {
+                return Direction.FORWARD;
+            }
+        }
     }
 
 }
