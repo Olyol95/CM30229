@@ -1,9 +1,8 @@
 package com.bjdody.cm30229;
 
 import com.bjdody.cm30229.async.SensorController;
-import com.bjdody.cm30229.async.SoundController;
 import com.bjdody.cm30229.layers.Layer;
-import com.bjdody.cm30229.layers.PlanningLayer;
+import com.bjdody.cm30229.layers.ProactiveLayer;
 import com.bjdody.cm30229.layers.ReactiveLayer;
 import com.bjdody.cm30229.model.Percept;
 import com.bjdody.cm30229.model.PerceptThread;
@@ -25,7 +24,7 @@ public class HybridAgent {
         instance = this;
 
         rootLayer = new ReactiveLayer();
-        rootLayer.setParentLayer( new PlanningLayer() );
+        rootLayer.setParentLayer( new ProactiveLayer() );
 
         perceptThread = new PerceptThread();
         perceptThread.start();

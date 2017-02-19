@@ -13,12 +13,12 @@ import java.util.HashMap;
 /**
  * Created by Ollie on 18/02/17.
  */
-public class PlanningLayer extends Layer {
+public class ProactiveLayer extends Layer {
 
     private HashMap<Direction, Integer> model;
     private Direction wallDirection;
 
-    public PlanningLayer() {
+    public ProactiveLayer() {
         reactionBounds.put( Direction.FORWARD, 40 );
         reactionBounds.put( Direction.LEFT, 45 );
         reactionBounds.put( Direction.RIGHT, 45 );
