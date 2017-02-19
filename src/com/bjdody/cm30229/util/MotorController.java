@@ -26,6 +26,14 @@ public class MotorController {
         alterSpeed( rightWheel, speed );
     }
 
+    public static void leftInc( int increment ) {
+        alterSpeed( leftWheel, leftWheel.getSpeed() + increment );
+    }
+
+    public static void rightInc( int increment ) {
+        alterSpeed( rightWheel, rightWheel.getSpeed() + increment );
+    }
+
     private static void alterSpeed( RegulatedMotor motor, int speed ) {
         motor.setSpeed( Math.max( Math.abs( speed ), MAX_SPEED ) );
         if ( speed < 0 ) {

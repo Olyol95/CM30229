@@ -6,6 +6,7 @@ import com.bjdody.cm30229.model.Percept;
 import com.bjdody.cm30229.model.UltrasoundPercept;
 import com.bjdody.cm30229.util.Direction;
 import com.bjdody.cm30229.util.MotorController;
+import lejos.nxt.Sound;
 
 /**
  * Created by Ollie on 18/02/17.
@@ -13,9 +14,9 @@ import com.bjdody.cm30229.util.MotorController;
 public class ReactiveLayer extends Layer {
 
     public ReactiveLayer() {
-        reactionBounds.put( Direction.FORWARD, 20 );
-        reactionBounds.put( Direction.LEFT, 20 );
-        reactionBounds.put( Direction.RIGHT, 20 );
+        reactionBounds.put( Direction.FORWARD, 25 );
+        reactionBounds.put( Direction.LEFT, 25 );
+        reactionBounds.put( Direction.RIGHT, 25 );
         reactionBounds.put( Direction.BACKWARD, 30 );
     }
 
@@ -42,6 +43,7 @@ public class ReactiveLayer extends Layer {
     private void handleUltrasoundPercept( UltrasoundPercept percept ) {
         Direction direction = Direction.fromRotation( percept.getRotation() );
         if ( percept.getDistance() <= reactionBounds.get( direction ) ) {
+            Sound.playTone( 500, 300 );
             int avoidanceSpeed = calculateAvoidanceSpeed( direction, percept.getDistance() );
             switch ( direction ) {
                 case FORWARD:
@@ -49,25 +51,33 @@ public class ReactiveLayer extends Layer {
                     MotorController.right( -avoidanceSpeed );
                     break;
                 case LEFT:
-                    MotorController.left( -avoidanceSpeed );
-                    MotorController.right( -avoidanceSpeed );
+                    //MotorController.left( -avoidanceSpeed );
+                    //MotorController.right( -avoidanceSpeed );
+                    /*try {
+                        Thread.sleep( SensorController.PERCEPT_FREQUENCY );
+                    } catch ( InterruptedException e ) {
+                        //do nothing
+                    }*/
+                    MotorController.right( -avoidanceSpeed / 5 );
+                    MotorController.left( avoidanceSpeed / 5 );
                     break;
-                    /*MotorController.right( -( avoidanceSpeed / 2) );
-                    MotorController.left( avoidanceSpeed );
-                    break;*/
                 case RIGHT:
-                    MotorController.left( -avoidanceSpeed );
-                    MotorController.right( -avoidanceSpeed );
+                    //MotorController.left( -avoidanceSpeed );
+                    //MotorController.right( -avoidanceSpeed );
+                    /*try {
+                        Thread.sleep( SensorController.PERCEPT_FREQUENCY );
+                    } catch ( InterruptedException e ) {
+                        //do nothing
+                    }*/
+                    MotorController.right( avoidanceSpeed / 5 );
+                    MotorController.left( -avoidanceSpeed / 5 );
                     break;
-                    /*MotorController.right( avoidanceSpeed );
-                    MotorController.left( -( avoidanceSpeed / 2) );
-                    break;*/
                 case BACKWARD:
                     MotorController.left( avoidanceSpeed );
                     MotorController.right( avoidanceSpeed );
                     break;
             }
-            setWait( SensorController.PERCEPT_FREQUENCY * 2 );
+            getParentLayer().setWait( SensorController.PERCEPT_FREQUENCY * 2 );
             percept.setHandled( true );
         }
     }
@@ -76,4 +86,9 @@ public class ReactiveLayer extends Layer {
 
     }
 
+    @Override
+    protected void setWait( int ms ) {
+        super.setWait( ms );
+        //getParentLayer().setWait( ms );
+    }
 }

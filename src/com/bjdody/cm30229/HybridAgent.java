@@ -5,6 +5,8 @@ import com.bjdody.cm30229.async.SoundController;
 import com.bjdody.cm30229.layers.Layer;
 import com.bjdody.cm30229.layers.PlanningLayer;
 import com.bjdody.cm30229.layers.ReactiveLayer;
+import com.bjdody.cm30229.model.Percept;
+import com.bjdody.cm30229.model.PerceptThread;
 import com.bjdody.cm30229.util.MotorController;
 import lejos.nxt.Button;
 
@@ -17,12 +19,16 @@ public class HybridAgent {
 
     private Layer rootLayer;
     private SensorController sensorController;
+    private PerceptThread perceptThread;
 
     public HybridAgent() {
         instance = this;
 
         rootLayer = new ReactiveLayer();
         rootLayer.setParentLayer( new PlanningLayer() );
+
+        perceptThread = new PerceptThread();
+        perceptThread.start();
 
         sensorController = new SensorController();
         sensorController.start();
@@ -39,7 +45,17 @@ public class HybridAgent {
         } catch ( InterruptedException e ) {
             System.err.println( "Join on sensor thread failed" );
         }
+        perceptThread.shutDown();
+        try {
+            perceptThread.join();
+        } catch ( InterruptedException e ) {
+            System.err.println( "Join on percept thread failed" );
+        }
         MotorController.stop();
+    }
+
+    public void enqueuePercept( Percept percept ) {
+        perceptThread.enqueue( percept );
     }
 
     public static void main( String[] args ) {

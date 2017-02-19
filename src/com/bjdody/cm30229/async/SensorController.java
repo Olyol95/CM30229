@@ -2,6 +2,7 @@ package com.bjdody.cm30229.async;
 
 import com.bjdody.cm30229.HybridAgent;
 import com.bjdody.cm30229.model.UltrasoundPercept;
+import com.bjdody.cm30229.util.Direction;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
@@ -12,9 +13,9 @@ import lejos.robotics.RegulatedMotor;
  */
 public class SensorController extends Thread {
 
-    public static final int MAX_ROTATION_ANGLE = 70,
-                            PERCEPT_FREQUENCY  = 20,
-                            ROTATION_STEP      = 70;
+    public static final int MAX_ROTATION_ANGLE = 50,
+                            PERCEPT_FREQUENCY  = 40,
+                            ROTATION_STEP      = 50;
 
     private UltrasonicSensor ultrasonicSensor;
     private RegulatedMotor sensorPlatform;
@@ -24,6 +25,7 @@ public class SensorController extends Thread {
 
     public SensorController() {
         ultrasonicSensor = new UltrasonicSensor( SensorPort.S3 );
+        ultrasonicSensor.continuous();
         sensorPlatform = Motor.A;
         sensorPlatform.setSpeed( 900 );
         platformRotation = 0;
@@ -34,7 +36,7 @@ public class SensorController extends Thread {
     public void run() {
         isActive = true;
         while ( isActive ) {
-            HybridAgent.instance.getRootLayer().onPercept(
+            HybridAgent.instance.enqueuePercept(
                     new UltrasoundPercept( ultrasonicSensor.getDistance(), platformRotation )
             );
             if ( lastRotation >= 0 ) {

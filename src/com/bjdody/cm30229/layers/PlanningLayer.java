@@ -6,6 +6,7 @@ import com.bjdody.cm30229.model.Percept;
 import com.bjdody.cm30229.model.UltrasoundPercept;
 import com.bjdody.cm30229.util.Direction;
 import com.bjdody.cm30229.util.MotorController;
+import lejos.nxt.Sound;
 
 import java.util.HashMap;
 
@@ -15,16 +16,18 @@ import java.util.HashMap;
 public class PlanningLayer extends Layer {
 
     private HashMap<Direction, Integer> model;
+    private Direction wallDirection;
 
     public PlanningLayer() {
         reactionBounds.put( Direction.FORWARD, 40 );
-        reactionBounds.put( Direction.LEFT, 35 );
-        reactionBounds.put( Direction.RIGHT, 35 );
-        reactionBounds.put( Direction.BACKWARD, 50 );
+        reactionBounds.put( Direction.LEFT, 45 );
+        reactionBounds.put( Direction.RIGHT, 45 );
+        reactionBounds.put( Direction.BACKWARD, 60 );
         model = new HashMap<>();
         for ( Direction direction : Direction.values() ) {
             model.put( direction, 255 );
         }
+        wallDirection = Direction.FORWARD;
     }
 
     @Override
@@ -32,31 +35,49 @@ public class PlanningLayer extends Layer {
         updateModel( percept );
 
         if ( wait <= 0 ) {
-            if ( !percept.isHandled() ) {
                 int forwardDistance = model.get( Direction.FORWARD  );
                 int leftDistance    = model.get( Direction.LEFT     );
                 int rightDistance   = model.get( Direction.RIGHT    );
                 int backDistance    = model.get( Direction.BACKWARD );
 
                 if ( forwardDistance <= reactionBounds.get( Direction.FORWARD ) ) {
+                    Sound.playTone( 360, 300 );
                     if ( leftDistance <= reactionBounds.get( Direction.LEFT ) ) {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.LEFT, leftDistance );
                         MotorController.left( avoidanceSpeed );
                         MotorController.right( 0 );
+                        wallDirection = Direction.LEFT;
                     } else if ( rightDistance <= reactionBounds.get( Direction.RIGHT ) ) {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.RIGHT, rightDistance );
                         MotorController.left( 0 );
                         MotorController.right( avoidanceSpeed );
+                        wallDirection = Direction.RIGHT;
                     } else {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.FORWARD, forwardDistance );
                         MotorController.left( avoidanceSpeed );
                         MotorController.right( 0 );
+                        wallDirection = Direction.LEFT;
                     }
                 } else {
-                    MotorController.left( MotorController.MAX_SPEED / 2 );
-                    MotorController.right( MotorController.MAX_SPEED / 2 );
+                    if ( wallDirection != Direction.FORWARD ) {
+                        int wallDistance = model.get( wallDirection );
+                        if ( wallDistance > reactionBounds.get( wallDirection ) ) {
+                            int avoidanceSpeed = calculateAvoidanceSpeed( wallDirection, wallDistance );
+                            switch ( wallDirection ) {
+                                case LEFT:
+                                    MotorController.left( avoidanceSpeed );
+                                    MotorController.right( 0 );
+                                    return;
+                                case RIGHT:
+                                    MotorController.left( 0 );
+                                    MotorController.right( avoidanceSpeed );
+                                    return;
+                            }
+                        }
+                    }
+                    MotorController.left( MotorController.MAX_SPEED / 3 );
+                    MotorController.right( MotorController.MAX_SPEED / 3 );
                 }
-            }
         } else {
             wait -= SensorController.PERCEPT_FREQUENCY;
         }
