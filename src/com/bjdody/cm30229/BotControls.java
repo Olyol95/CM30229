@@ -1,8 +1,6 @@
 package com.bjdody.cm30229;
 
-import lejos.nxt.Motor;
-import lejos.nxt.SensorPort;
-import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.*;
 import lejos.robotics.RegulatedMotor;
 
 /**
@@ -13,61 +11,64 @@ public class BotControls {
     public RegulatedMotor RightWheel;
 
     public RegulatedMotor SensorPlatform;
-    public UltrasonicSensor Sensor;
+    public UltrasonicSensor USSensor;
 
-    private static final int MoveSenseDelay = 40;
+    public TouchSensor TSensor1;
+    public TouchSensor TSensor2;
+
+    public LightSensor LSensor;
+
+    private static final int LightLevelBound = 90;
+    private static final int SenseDelay = 20;
+    
+    private static final int MaxWheelSpeed  = 360;
+    private static final int MaxSensorSpeed = 900;
 
     public BotControls()
     {
-        LeftWheel = Motor.C;
-        RightWheel = Motor.B;
+        LeftWheel = Motor.B;
+        RightWheel = Motor.C;
         SensorPlatform = Motor.A;
 
-        LeftWheel.setSpeed( 360 );
-        RightWheel.setSpeed( 360 );
-        SensorPlatform.setSpeed( 720 );
+        LeftWheel.setSpeed( MaxWheelSpeed );
+        RightWheel.setSpeed( MaxWheelSpeed );
+        SensorPlatform.setSpeed( MaxSensorSpeed );
 
-        Sensor = new UltrasonicSensor(SensorPort.S3);
-        Sensor.continuous();
+        USSensor = new UltrasonicSensor(SensorPort.S3);
+        USSensor.continuous();
+
+        TSensor1 = new TouchSensor(SensorPort.S1);
+        TSensor2 = new TouchSensor(SensorPort.S2);
+
+        LSensor = new LightSensor(SensorPort.S4, false);
     }
 
     //<editor-fold desc="Movement - BotControls movement and turning of the robot">
     //Movement - BotControls movement and turning of the robot
 
-    public void MoveForward()
+    public void Move(float left_ratio, float right_ratio)
     {
-        LeftWheel.forward();
-        RightWheel.forward();
-    }
+        if (left_ratio >= 0)
+        {
+            LeftWheel.setSpeed((int)(MaxWheelSpeed * left_ratio));
+            LeftWheel.forward();
+        }
+        else
+        {
+            LeftWheel.setSpeed((int)(MaxWheelSpeed * -left_ratio));
+            LeftWheel.backward();
+        }
 
-    public void MoveBackward()
-    {
-        LeftWheel.backward();
-        RightWheel.backward();
-    }
-
-    public void MoveLeftGradual()
-    {
-        LeftWheel.forward();
-        RightWheel.stop();
-    }
-
-    public void MoveRightGradual()
-    {
-        LeftWheel.stop();
-        RightWheel.forward();
-    }
-
-    public void MoveLeftUrgent()
-    {
-        LeftWheel.forward();
-        RightWheel.backward();
-    }
-
-    public void MoveRightUrgent()
-    {
-        LeftWheel.backward();
-        RightWheel.forward();
+        if (right_ratio >= 0)
+        {
+            RightWheel.setSpeed((int)(MaxWheelSpeed * right_ratio));
+            RightWheel.forward();
+        }
+        else
+        {
+            RightWheel.setSpeed((int)(MaxWheelSpeed * right_ratio));
+            RightWheel.backward();
+        }
     }
 
     public void Stop()
@@ -78,146 +79,34 @@ public class BotControls {
 
     //</editor-fold>
 
-    private Direction CurrentDirection = Direction.FORWARD;
+    private int ScanAngle = 0;
 
-    public int ScanLeft()
+    public int ScanTo(int new_angle)
     {
-        switch (CurrentDirection)
-        {
-            case FORWARD:
-            {
-                Rotate(-90);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case LEFT:
-            {
-                //Do nothing
-                break;
-            }
-            case RIGHT:
-            {
-                Rotate(-180);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case BACKWARD:
-            {
-                Rotate(-270);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            default: System.out.println("Unexpected direction in BotControls:ScanLeft");
-        }
-
-        CurrentDirection = Direction.LEFT;
-        return Sensor.getDistance();
-    }
-
-    public int ScanRight()
-    {
-        switch (CurrentDirection)
-        {
-            case FORWARD:
-            {
-                Rotate(90);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case LEFT:
-            {
-                Rotate(180);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case RIGHT:
-            {
-                //Do nothing
-                break;
-            }
-            case BACKWARD:
-            {
-                Rotate(-90);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            default: System.out.println("Unexpected direction in BotControls:ScanRight");
-        }
-
-        CurrentDirection = Direction.RIGHT;
-        return Sensor.getDistance();
-    }
-
-    public int ScanForward()
-    {
-        switch (CurrentDirection)
-        {
-            case FORWARD:
-            {
-                //Do nothing
-                break;
-            }
-            case LEFT:
-            {
-                Rotate(90);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case RIGHT:
-            {
-                Rotate(-90);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case BACKWARD:
-            {
-                Rotate(-180);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            default: System.out.println("Unexpected direction in BotControls:ScanForward");
-        }
-
-        CurrentDirection = Direction.FORWARD;
-        return Sensor.getDistance();
-    }
-
-    public int ScanBackward()
-    {
-        switch (CurrentDirection)
-        {
-            case FORWARD:
-            {
-                Rotate(180);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case LEFT:
-            {
-                Rotate(270);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case RIGHT:
-            {
-                Rotate(90);
-                Utility.Wait(MoveSenseDelay);
-                break;
-            }
-            case BACKWARD:
-            {
-                //Do nothing
-                break;
-            }
-            default: System.out.println("Unexpected direction in BotControls:ScanBackward");
-        }
-
-        CurrentDirection = Direction.BACKWARD;
-        return Sensor.getDistance();
-    }
-
-    private void Rotate(int rotation)
-    {
+        int rotation = new_angle - ScanAngle;
         SensorPlatform.rotate(rotation);
+        ScanAngle = new_angle;
+
+        int dark_light_level = LSensor.getNormalizedLightValue();
+        LSensor.setFloodlight(true);
+        Utility.Wait(SenseDelay);
+        int bright_light_level = LSensor.getNormalizedLightValue();
+        LSensor.setFloodlight(false);
+        Utility.Wait(SenseDelay);
+
+        if (dark_light_level + LightLevelBound < bright_light_level)
+        {
+            Sound.beepSequenceUp();
+            return 1;
+        }
+        else
+        {
+            return USSensor.getDistance();
+        }
+    }
+
+    public boolean DetectTouch()
+    {
+        return TSensor1.isPressed() || TSensor2.isPressed();
     }
 }

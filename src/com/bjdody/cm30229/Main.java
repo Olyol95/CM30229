@@ -6,23 +6,29 @@ public class Main {
 
     public static void main( String[] args ) {
         BotControls controls = new BotControls();
-        SensorController s_controller = new SensorController(controls);
-        s_controller.start();
 
-        BotBrain brain = new BotBrain(BotBrain.BotState.Moving_Forward, controls, s_controller);
+        VisibilitySensorController vs_controller = new VisibilitySensorController(controls);
+        vs_controller.start();
+
+        TouchSensorController touch_controller = new TouchSensorController(controls);
+        touch_controller.start();
+
+        BotBrain brain = new BotBrain(BotBrain.BotState.WALLSEARCH, controls, vs_controller, touch_controller);
         BrainController b_controller = new BrainController(brain);
         b_controller.start();
 
         Button.waitForAnyPress();
-        s_controller.Kill();
+        vs_controller.Kill();
         b_controller.Kill();
+        touch_controller.Kill();
 
-        while (!s_controller.IsFinished() || !b_controller.IsFinished())
+        while (!vs_controller.IsFinished() || !b_controller.IsFinished() ||
+                !touch_controller.IsFinished())
         {
-            Utility.Wait(250);
+            Utility.Wait(100);
         }
 
-        controls.MoveForward();
+        controls.ScanTo(0);
         controls.Stop();
         Button.waitForAnyPress();
     }

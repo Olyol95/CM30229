@@ -2,7 +2,6 @@ package com.bjdody.cm30229;
 
 import lejos.nxt.Sound;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -11,23 +10,26 @@ import java.util.HashMap;
 public class BotBrain {
 
     private BotControls Controls;
-    private SensorController SensorData;
+    private VisibilitySensorController USSensorData;
+    private TouchSensorController TouchData;
 
     //<editor-fold desc="State Control">
     //State Control - State Management
 
     public enum BotState{
-        Moving_Forward
-        ,Turning_Left_Gradual
-        ,Turning_Right_Gradual
-        ,Turning_Left_Emergency
-        ,Turning_Right_Emergency
-        ,Collision_Recovery
+        WALLSEARCH,
+        AVOIDLEFT,
+        AVOIDRIGHT,
+        AVOIDFORWARD,
+        STAYWITHLEFT,
+        STAYWITHRIGHT,
+        COLLISIONRECOVERY;
     }
 
     public enum RangeBound {
-        NORMAL,
-        URGENT;
+        DETECT,
+        TOOFAR,
+        TOOCLOSE;
 
         private HashMap<Direction, Integer> ranges;
 
@@ -51,21 +53,17 @@ public class BotBrain {
     }
 
     private BotState State;
-    private Direction lastTurnDirection = Direction.LEFT;
+    private Direction LastSideWallFound;
+    private long TimeOfLastWallFind;
 
-    public BotBrain(BotState initial_state, BotControls in_controls, SensorController in_sensor_data){
+    public BotBrain(BotState initial_state, BotControls in_controls,
+                    VisibilitySensorController in_us_sensor_data, TouchSensorController in_touch_data){
         State = initial_state;
         Controls = in_controls;
-        SensorData = in_sensor_data;
+        USSensorData = in_us_sensor_data;
+        TouchData = in_touch_data;
 
-        for ( Direction direction : Direction.values() ) {
-            RangeBound.NORMAL.putRange( direction, 35 );
-            RangeBound.URGENT.putRange( direction, 25 );
-        }
-        RangeBound.NORMAL.putRange( Direction.LEFT, 30 );
-        RangeBound.URGENT.putRange( Direction.LEFT, 23 );
-        RangeBound.NORMAL.putRange( Direction.RIGHT, 30 );
-        RangeBound.URGENT.putRange( Direction.RIGHT, 23 );
+        LastSideWallFound = Direction.RIGHT;
 
         OnEnter();
     }
@@ -80,115 +78,208 @@ public class BotBrain {
     //</editor-fold>
 
     //<editor-fold desc="Think - Called every 'frame' as an update function">
+
+    private static final int DetectRange = 85;
+    private static final int TooFarRange = 60;
+    private static final int UltraSlowRange = 15;
+    private static final int TooCloseSideRange = 30;
+    private static final int TooCloseFrontRange = 30;
+    private static final int MillTimeToGoFaster = 1000;
+    private static final int MillTimeToForget = 6000;
+
     //Think - Called every 'frame' as an update function
     public void Think()
     {
-        switch(State)
+        float left = USSensorData.GetLeftScan();
+        float right = USSensorData.GetRightScan();
+        float forward = USSensorData.GetFrontScan();
+        boolean touch = TouchData.GetTouch();
+
+        float move_scalar;
+        if (left < UltraSlowRange || right < UltraSlowRange || forward < UltraSlowRange)
         {
-            case Moving_Forward:
-                Think_Moving_Forward();
+            move_scalar = 0.5f;
+        }
+        else
+        {
+            move_scalar = 1.0f;
+        }
+
+        switch (State)
+        {
+            case WALLSEARCH:
+                Controls.Move(1.0f * move_scalar, 1.0f * move_scalar);
+                if (touch)
+                {
+                  SwitchState(BotState.COLLISIONRECOVERY);
+                }
+                else if (left < right)
+                {
+                    if (left < DetectRange)
+                    {
+                        SwitchState(BotState.STAYWITHLEFT);
+                    }
+                }
+                else if (right < DetectRange)
+                {
+                    SwitchState(BotState.STAYWITHRIGHT);
+                }
                 break;
-            case Turning_Left_Gradual:
-                Think_Turning_Left_Gradual();
+            case AVOIDRIGHT:
+                Controls.Move(-0.25f * move_scalar, 1.0f * move_scalar);
+                if (touch)
+                {
+                    SwitchState(BotState.COLLISIONRECOVERY);
+                }
+                else if (left < right)
+                {
+                    if (forward < left)
+                    {
+                        SwitchState(BotState.AVOIDFORWARD);
+                    }
+                    else
+                    {
+                        SwitchState(BotState.AVOIDLEFT);
+                    }
+                }
+                else if (right > TooCloseSideRange)
+                {
+                    SwitchState(BotState.STAYWITHRIGHT);
+                }
                 break;
-            case Turning_Right_Gradual:
-                Think_Turning_Right_Gradual();
+            case AVOIDLEFT:
+                Controls.Move(1.0f * move_scalar, -0.25f * move_scalar);
+                if (touch)
+                {
+                    SwitchState(BotState.COLLISIONRECOVERY);
+                }
+                else if (right < left)
+                {
+                    if (forward < right)
+                    {
+                        SwitchState(BotState.AVOIDFORWARD);
+                    }
+                    else
+                    {
+                        SwitchState(BotState.AVOIDRIGHT);
+                    }
+                }
+                else if (left > TooCloseSideRange)
+                {
+                    SwitchState(BotState.STAYWITHLEFT);
+                }
                 break;
-            case Turning_Left_Emergency:
-                Think_Turning_Left_Emergency();
+            case AVOIDFORWARD:
+                if (touch)
+                {
+                    SwitchState(BotState.COLLISIONRECOVERY);
+                }
+                else if (forward > TooCloseFrontRange)
+                {
+                    if (LastSideWallFound == Direction.LEFT)
+                    {
+                        if (right < left && right < TooCloseSideRange)
+                        {
+                            SwitchState(BotState.AVOIDRIGHT);
+                        }
+                        else
+                        {
+                            SwitchState(BotState.STAYWITHLEFT);
+                        }
+                    }
+                    else
+                    {
+                        if (left < right && left < TooCloseSideRange)
+                        {
+                            SwitchState(BotState.AVOIDLEFT);
+                        }
+                        else
+                        {
+                            SwitchState(BotState.STAYWITHRIGHT);
+                        }
+                    }
+                }
                 break;
-            case Turning_Right_Emergency:
-                Think_Turning_Right_Emergency();
+            case STAYWITHLEFT:
+                if (touch)
+                {
+                    SwitchState(BotState.COLLISIONRECOVERY);
+                }
+                else if (forward < TooCloseFrontRange)
+                {
+                    SwitchState(BotState.AVOIDFORWARD);
+                }
+                else if (right < left && right < TooCloseSideRange)
+                {
+                    SwitchState(BotState.AVOIDRIGHT);
+                }
+                else if (left < TooCloseSideRange)
+                {
+                    SwitchState(BotState.AVOIDLEFT);
+                }
+                else if (left > TooFarRange)
+                {
+                    long DeltaTimeOfWallFind = System.currentTimeMillis() - TimeOfLastWallFind;
+                    if (DeltaTimeOfWallFind < MillTimeToForget)
+                    {
+                        Controls.Move(0.0f, 1.0f * move_scalar);
+                    }
+                    else
+                    {
+                        SwitchState(BotState.WALLSEARCH);
+                    }
+                }
+                else
+                {
+                    Controls.Move(1.0f * move_scalar, 1.0f * move_scalar);
+                    TimeOfLastWallFind = System.currentTimeMillis();
+                }
                 break;
-            case Collision_Recovery:
-                Think_Collision_Recovery();
+            case STAYWITHRIGHT:
+                if (touch)
+                {
+                    SwitchState(BotState.COLLISIONRECOVERY);
+                }
+                else if (forward < TooCloseFrontRange)
+                {
+                    SwitchState(BotState.AVOIDFORWARD);
+                }
+                else if (left < right && left < TooCloseSideRange)
+                {
+                    SwitchState(BotState.AVOIDLEFT);
+                }
+                else if (right < TooCloseSideRange)
+                {
+                    SwitchState(BotState.AVOIDRIGHT);
+                }
+                else if (right > TooFarRange)
+                {
+                    long DeltaTimeOfWallFind = System.currentTimeMillis() - TimeOfLastWallFind;
+                    if (DeltaTimeOfWallFind < MillTimeToForget)
+                    {
+                        Controls.Move(1.0f * move_scalar, 0.0f);
+                    }
+                    else
+                    {
+                        SwitchState(BotState.WALLSEARCH);
+                    }
+                }
+                else
+                {
+
+                    Controls.Move(1.0f * move_scalar, 1.0f * move_scalar);
+                    TimeOfLastWallFind = System.currentTimeMillis();
+                }
                 break;
-            default:
-                System.out.println("Unexpected State encountered in BotBrain::Think()");
+            case COLLISIONRECOVERY:
+                if (!touch)
+                {
+                    SwitchState(BotState.WALLSEARCH);
+                }
+                break;
         }
     }
 
-    private void Think_Moving_Forward()
-    {
-        int forwardRange = SensorData.GetFrontScan();
-        int rightRange   = SensorData.GetRightScan();
-        int leftRange    = SensorData.GetLeftScan();
-
-        if ( rightRange <= RangeBound.NORMAL.getRange( Direction.RIGHT ) ) {
-            lastTurnDirection = Direction.LEFT;
-            SwitchState( BotState.Turning_Left_Gradual );
-        }
-        else if ( leftRange <= RangeBound.NORMAL.getRange( Direction.LEFT ) ) {
-            lastTurnDirection = Direction.RIGHT;
-            SwitchState( BotState.Turning_Right_Gradual );
-        }
-        else if ( forwardRange <= RangeBound.NORMAL.getRange( Direction.FORWARD ) ) {
-            switch ( lastTurnDirection ) {
-                case LEFT:
-                    SwitchState( BotState.Turning_Left_Gradual );
-                    break;
-                case RIGHT:
-                    SwitchState( BotState.Turning_Right_Gradual );
-                    break;
-                default:
-                    throw new RuntimeException(
-                            "Forward range bound met but the direction of last turn is unknown!"
-                    );
-            }
-        }
-    }
-
-    private void Think_Turning_Left_Gradual()
-    {
-        int forwardRange = SensorData.GetFrontScan();
-        int rightRange   = SensorData.GetRightScan();
-
-        if ( forwardRange >= RangeBound.NORMAL.getRange( Direction.FORWARD ) &&
-                rightRange > RangeBound.NORMAL.getRange( Direction.RIGHT ) ) {
-            SwitchState( BotState.Moving_Forward );
-        } else if ( rightRange <= RangeBound.URGENT.getRange( Direction.RIGHT ) ||
-                    forwardRange <= RangeBound.URGENT.getRange( Direction.FORWARD ) ) {
-            SwitchState( BotState.Turning_Left_Emergency );
-        }
-    }
-
-    private void Think_Turning_Right_Gradual()
-    {
-        int forwardRange = SensorData.GetFrontScan();
-        int leftRange    = SensorData.GetLeftScan();
-
-        if ( forwardRange >= RangeBound.NORMAL.getRange( Direction.FORWARD ) &&
-                leftRange > RangeBound.NORMAL.getRange( Direction.LEFT ) ) {
-            SwitchState( BotState.Moving_Forward );
-        } else if ( leftRange <= RangeBound.URGENT.getRange( Direction.LEFT ) ||
-                forwardRange <= RangeBound.URGENT.getRange( Direction.FORWARD ) ) {
-                SwitchState( BotState.Turning_Right_Emergency );
-        }
-    }
-
-    private void Think_Turning_Left_Emergency()
-    {
-        int rightRange = SensorData.GetRightScan();
-
-        if ( rightRange > RangeBound.URGENT.getRange( Direction.RIGHT ) ) {
-            SwitchState( BotState.Turning_Left_Gradual );
-        }
-    }
-
-    private void Think_Turning_Right_Emergency()
-    {
-        int leftRange = SensorData.GetLeftScan();
-
-        if ( leftRange > RangeBound.URGENT.getRange( Direction.LEFT ) ) {
-            SwitchState( BotState.Turning_Right_Gradual );
-        }
-    }
-
-    private void Think_Collision_Recovery()
-    {
-        //Controls.ScanLeft();
-        //Controls.ScanRight();
-    }
     //</editor-fold>
 
     //<editor-fold desc="OnEnter - Called when first entering a new state">
@@ -196,64 +287,77 @@ public class BotBrain {
     public void OnEnter()
     {
         System.out.println( State );
+
         switch(State)
         {
-            case Moving_Forward:
-                Sound.playNote( Sound.XYLOPHONE, 392, 200 );
-                OnEnter_Moving_Forward();
+            case WALLSEARCH:
+                USSensorData.SetScanMode(VisibilitySensorController.ScanMode.Forward);
                 break;
-            case Turning_Left_Gradual:
-                Sound.playNote( Sound.XYLOPHONE, 592, 300 );
-                OnEnter_Turning_Left_Gradual();
+            case AVOIDLEFT:
+                USSensorData.SetScanMode(VisibilitySensorController.ScanMode.Left);
+                if (LastSideWallFound == Direction.RIGHT)
+                {
+                    Sound.beepSequenceUp();
+                }
+                LastSideWallFound = Direction.LEFT;
                 break;
-            case Turning_Right_Gradual:
-                Sound.playNote( Sound.XYLOPHONE, 592, 300 );
-                OnEnter_Turning_Right_Gradual();
+            case AVOIDRIGHT:
+                USSensorData.SetScanMode(VisibilitySensorController.ScanMode.Right);
+                if (LastSideWallFound == Direction.LEFT)
+                {
+                    Sound.beepSequenceUp();
+                }
+                LastSideWallFound = Direction.RIGHT;
                 break;
-            case Turning_Left_Emergency:
-                Sound.playNote( Sound.XYLOPHONE, 792, 500 );
-                OnEnter_Turning_Left_Emergency();
+            case AVOIDFORWARD:
+                USSensorData.SetScanMode(VisibilitySensorController.ScanMode.Forward);
+                int left = USSensorData.GetLeftScan();
+                int right = USSensorData.GetRightScan();
+
+                if (left <= right && left < TooCloseSideRange)
+                {
+                    Controls.Move(0.5f, -0.5f);
+                }
+                else if (right < left && right < TooCloseSideRange)
+                {
+                    Controls.Move(-0.5f, 0.5f);
+                }
+                else if (LastSideWallFound == Direction.LEFT)
+                {
+                    Controls.Move(0.5f, -0.5f);
+                }
+                else
+                {
+                    Controls.Move(-0.5f, 0.5f);
+                }
                 break;
-            case Turning_Right_Emergency:
-                Sound.playNote( Sound.XYLOPHONE, 792, 500 );
-                OnEnter_Turning_Right_Emergency();
+            case STAYWITHLEFT:
+                USSensorData.SetScanMode(VisibilitySensorController.ScanMode.Left);
+                Controls.Move(1.0f, 1.0f);
+                if (LastSideWallFound == Direction.RIGHT)
+                {
+                    Sound.beepSequenceUp();
+                }
+                LastSideWallFound = Direction.LEFT;
+                TimeOfLastWallFind = System.currentTimeMillis();
                 break;
-            case Collision_Recovery:
-                OnEnter_Collision_Recovery();
+            case STAYWITHRIGHT:
+                USSensorData.SetScanMode(VisibilitySensorController.ScanMode.Right);
+                Controls.Move(1.0f, 1.0f);
+                if (LastSideWallFound == Direction.LEFT)
+                {
+                    Sound.beepSequenceUp();
+                }
+                LastSideWallFound = Direction.RIGHT;
+                TimeOfLastWallFind = System.currentTimeMillis();
                 break;
-            default:
-                System.out.println("Unexpected State encountered in BotBrain::OnEnter()");
+            case COLLISIONRECOVERY:
+                Controls.Move(-1.0f, -1.0f);
+                break;
+            default: {
+
+            }
         }
-    }
-
-    private void OnEnter_Moving_Forward()
-    {
-        Controls.MoveForward();
-    }
-
-    private void OnEnter_Turning_Left_Gradual()
-    {
-        Controls.MoveLeftGradual();
-    }
-
-    private void OnEnter_Turning_Right_Gradual()
-    {
-        Controls.MoveRightGradual();
-    }
-
-    private void OnEnter_Turning_Left_Emergency()
-    {
-        Controls.MoveLeftUrgent();
-    }
-
-    private void OnEnter_Turning_Right_Emergency()
-    {
-        Controls.MoveRightUrgent();
-    }
-
-    private void OnEnter_Collision_Recovery()
-    {
-        //TODO
     }
     //</editor-fold>
 
@@ -261,29 +365,7 @@ public class BotBrain {
     //OnExit - Called when exiting a state to clean up anything needed
     public void OnExit()
     {
-        switch(State)
-        {
-            case Moving_Forward:
-                OnExit_Moving_Forward();
-                break;
-            case Turning_Left_Gradual:
-                OnExit_Turning_Left_Gradual();
-                break;
-            case Turning_Right_Gradual:
-                OnExit_Turning_Right_Gradual();
-                break;
-            case Turning_Left_Emergency:
-                OnExit_Turning_Left_Emergency();
-                break;
-            case Turning_Right_Emergency:
-                OnExit_Turning_Right_Emergency();
-                break;
-            case Collision_Recovery:
-                OnExit_Collision_Recovery();
-                break;
-            default:
-                System.out.println("Unexpected State encountered in BotBrain::OnExit()");
-        }
+
     }
 
     private void OnExit_Moving_Forward()
@@ -297,16 +379,6 @@ public class BotBrain {
     }
 
     private void OnExit_Turning_Right_Gradual()
-    {
-        //TODO
-    }
-
-    private void OnExit_Turning_Left_Emergency()
-    {
-        //TODO
-    }
-
-    private void OnExit_Turning_Right_Emergency()
     {
         //TODO
     }
