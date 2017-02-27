@@ -15,9 +15,9 @@ public class ReactiveLayer extends Layer {
 
     public ReactiveLayer() {
         reactionBounds.put( Direction.FORWARD, 25 );
-        reactionBounds.put( Direction.LEFT, 25 );
-        reactionBounds.put( Direction.RIGHT, 25 );
-        reactionBounds.put( Direction.BACKWARD, 30 );
+        reactionBounds.put( Direction.LEFT, 20 );
+        reactionBounds.put( Direction.RIGHT, 20 );
+        reactionBounds.put( Direction.BACKWARD, 35 );
     }
 
     @Override
@@ -58,8 +58,8 @@ public class ReactiveLayer extends Layer {
                     } catch ( InterruptedException e ) {
                         //do nothing
                     }*/
-                    MotorController.right( -avoidanceSpeed / 5 );
-                    MotorController.left( avoidanceSpeed / 5 );
+                    MotorController.right( -avoidanceSpeed / 2 );
+                    MotorController.left( avoidanceSpeed / 2 );
                     break;
                 case RIGHT:
                     //MotorController.left( -avoidanceSpeed );
@@ -69,8 +69,8 @@ public class ReactiveLayer extends Layer {
                     } catch ( InterruptedException e ) {
                         //do nothing
                     }*/
-                    MotorController.right( avoidanceSpeed / 5 );
-                    MotorController.left( -avoidanceSpeed / 5 );
+                    MotorController.right( avoidanceSpeed / 2 );
+                    MotorController.left( -avoidanceSpeed / 2 );
                     break;
                 case BACKWARD:
                     MotorController.left( avoidanceSpeed );
@@ -86,9 +86,4 @@ public class ReactiveLayer extends Layer {
 
     }
 
-    @Override
-    protected void setWait( int ms ) {
-        super.setWait( ms );
-        //getParentLayer().setWait( ms );
-    }
 }

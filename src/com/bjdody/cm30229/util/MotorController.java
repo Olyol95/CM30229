@@ -8,7 +8,7 @@ import lejos.robotics.RegulatedMotor;
  */
 public class MotorController {
 
-    public static final int MAX_SPEED = 360;
+    public static final int MAX_SPEED = 720;
 
     private static RegulatedMotor leftWheel = Motor.B;
     private static RegulatedMotor rightWheel = Motor.C;
@@ -35,7 +35,7 @@ public class MotorController {
     }
 
     private static void alterSpeed( RegulatedMotor motor, int speed ) {
-        motor.setSpeed( Math.max( Math.abs( speed ), MAX_SPEED ) );
+        motor.setSpeed( Math.min( Math.abs( speed ), MAX_SPEED ) );
         if ( speed < 0 ) {
             motor.backward();
         } else if ( speed > 0 ) {

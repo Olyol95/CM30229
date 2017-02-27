@@ -36,7 +36,7 @@ public abstract class Layer {
 
     protected int calculateAvoidanceSpeed( Direction direction, int distance ) {
         int reactionBound = reactionBounds.get( direction );
-        return ( -MotorController.MAX_SPEED / reactionBound ) * ( distance - reactionBound ) + 1;
+        return ( -MotorController.MAX_SPEED / reactionBound ) * ( distance - reactionBound ) + ( MotorController.MAX_SPEED / 4 );
     }
 
 }

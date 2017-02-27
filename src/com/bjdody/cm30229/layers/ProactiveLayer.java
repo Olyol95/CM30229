@@ -20,9 +20,9 @@ public class ProactiveLayer extends Layer {
 
     public ProactiveLayer() {
         reactionBounds.put( Direction.FORWARD, 40 );
-        reactionBounds.put( Direction.LEFT, 45 );
-        reactionBounds.put( Direction.RIGHT, 45 );
-        reactionBounds.put( Direction.BACKWARD, 60 );
+        reactionBounds.put( Direction.LEFT, 40 );
+        reactionBounds.put( Direction.RIGHT, 40 );
+        reactionBounds.put( Direction.BACKWARD, 50 );
         model = new HashMap<>();
         for ( Direction direction : Direction.values() ) {
             model.put( direction, 255 );
@@ -62,21 +62,20 @@ public class ProactiveLayer extends Layer {
                     if ( wallDirection != Direction.FORWARD ) {
                         int wallDistance = model.get( wallDirection );
                         if ( wallDistance > reactionBounds.get( wallDirection ) ) {
-                            int avoidanceSpeed = calculateAvoidanceSpeed( wallDirection, wallDistance );
                             switch ( wallDirection ) {
                                 case LEFT:
-                                    MotorController.left( avoidanceSpeed );
-                                    MotorController.right( 0 );
+                                    MotorController.left( MotorController.MAX_SPEED / 4 );
+                                    MotorController.right( MotorController.MAX_SPEED / 2 );
                                     return;
                                 case RIGHT:
-                                    MotorController.left( 0 );
-                                    MotorController.right( avoidanceSpeed );
+                                    MotorController.left( MotorController.MAX_SPEED / 2 );
+                                    MotorController.right( MotorController.MAX_SPEED / 4 );
                                     return;
                             }
                         }
                     }
-                    MotorController.left( MotorController.MAX_SPEED / 3 );
-                    MotorController.right( MotorController.MAX_SPEED / 3 );
+                    MotorController.left( MotorController.MAX_SPEED / 2 );
+                    MotorController.right( MotorController.MAX_SPEED / 2 );
                 }
         } else {
             wait -= SensorController.PERCEPT_FREQUENCY;
