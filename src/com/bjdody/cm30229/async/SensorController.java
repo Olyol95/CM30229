@@ -23,6 +23,8 @@ public class SensorController extends Thread {
     private TouchSensor leftTouchSensor, rightTouchSensor;
     private RegulatedMotor sensorPlatform;
 
+    private Direction wallDirection;
+
     private int platformRotation, lastRotation;
     private boolean isActive;
 
@@ -35,10 +37,12 @@ public class SensorController extends Thread {
         sensorPlatform.setSpeed( 900 );
         platformRotation = 0;
         lastRotation = 0;
+        wallDirection = Direction.FORWARD;
     }
 
     @Override
     public void run() {
+        long rotations = 0L;
         isActive = true;
         while ( isActive ) {
             double distance = ultrasonicSensor.getDistance() * 0.4;
@@ -65,17 +69,27 @@ public class SensorController extends Thread {
 
             if ( lastRotation >= 0 ) {
                 if ( platformRotation + ROTATION_STEP <= MAX_ROTATION_ANGLE ) {
-                    rotateSensor( ROTATION_STEP );
+                    if ( wallDirection != Direction.LEFT || rotations % 8 == 0 ) {
+                        rotateSensor( ROTATION_STEP );
+                    } else {
+                        rotateSensor( -ROTATION_STEP );
+                    }
                 } else {
                     rotateSensor( -ROTATION_STEP );
                 }
             } else {
                 if ( Math.abs( platformRotation - ROTATION_STEP ) <= MAX_ROTATION_ANGLE ) {
-                    rotateSensor( -ROTATION_STEP );
+                    if ( wallDirection != Direction.RIGHT || rotations % 8 == 0 ) {
+                        rotateSensor( -ROTATION_STEP );
+                    } else {
+                        rotateSensor( ROTATION_STEP );
+                    }
                 } else {
                     rotateSensor( ROTATION_STEP );
                 }
             }
+            rotations++;
+
             try {
                 sleep( PERCEPT_FREQUENCY );
             } catch ( InterruptedException e ) {
@@ -93,6 +107,10 @@ public class SensorController extends Thread {
 
     public void shutDown() {
         isActive = false;
+    }
+
+    public void setWallDirection( Direction direction ) {
+        this.wallDirection = direction;
     }
 
 }

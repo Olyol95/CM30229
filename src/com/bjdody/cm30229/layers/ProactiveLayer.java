@@ -1,7 +1,7 @@
 package com.bjdody.cm30229.layers;
 
+import com.bjdody.cm30229.HybridAgent;
 import com.bjdody.cm30229.async.SensorController;
-import com.bjdody.cm30229.model.BumpPercept;
 import com.bjdody.cm30229.model.Percept;
 import com.bjdody.cm30229.model.UltrasoundPercept;
 import com.bjdody.cm30229.util.Direction;
@@ -46,17 +46,17 @@ public class ProactiveLayer extends Layer {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.LEFT, leftDistance );
                         MotorController.left( avoidanceSpeed );
                         MotorController.right( 0 );
-                        wallDirection = Direction.LEFT;
+                        setWallDirection( Direction.LEFT );
                     } else if ( rightDistance <= reactionBounds.get( Direction.RIGHT ) ) {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.RIGHT, rightDistance );
                         MotorController.left( 0 );
                         MotorController.right( avoidanceSpeed );
-                        wallDirection = Direction.RIGHT;
+                        setWallDirection( Direction.RIGHT );
                     } else {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.FORWARD, forwardDistance );
                         MotorController.left( avoidanceSpeed );
                         MotorController.right( 0 );
-                        wallDirection = Direction.LEFT;
+                        setWallDirection( Direction.LEFT );
                     }
                 } else {
                     if ( wallDirection != Direction.FORWARD ) {
@@ -87,6 +87,11 @@ public class ProactiveLayer extends Layer {
             UltrasoundPercept ultrasoundPercept = (UltrasoundPercept) percept;
             model.put( Direction.fromRotation( ultrasoundPercept.getRotation() ), ultrasoundPercept.getDistance() );
         }
+    }
+
+    private void setWallDirection( Direction direction ) {
+        this.wallDirection = direction;
+        HybridAgent.instance.getSensorController().setWallDirection( direction );
     }
 
 }

@@ -37,6 +37,10 @@ public class HybridAgent {
         return rootLayer;
     }
 
+    public SensorController getSensorController() {
+        return sensorController;
+    }
+
     public void onExit() {
         sensorController.shutDown();
         try {
