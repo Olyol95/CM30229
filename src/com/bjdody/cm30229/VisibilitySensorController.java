@@ -44,7 +44,7 @@ public class VisibilitySensorController extends Thread{
         Mode = in_mode;
     }
 
-    private static final int Scanability = 45;
+    private static final int Scanability = 70;
 
     @Override
     public void run()
