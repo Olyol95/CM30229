@@ -16,7 +16,7 @@ import lejos.robotics.RegulatedMotor;
 public class SensorController extends Thread {
 
     public static final int MAX_ROTATION_ANGLE = 50,
-                            PERCEPT_FREQUENCY  = 40,
+                            PERCEPT_FREQUENCY  = 20,
                             ROTATION_STEP      = 50;
 
     private UltrasonicSensor ultrasonicSensor;
@@ -41,6 +41,8 @@ public class SensorController extends Thread {
     public void run() {
         isActive = true;
         while ( isActive ) {
+            double distance = ultrasonicSensor.getDistance() * 0.4;
+
             if ( leftTouchSensor.isPressed() && rightTouchSensor.isPressed() ) {
                 HybridAgent.instance.enqueuePercept(
                         new BumpPercept( Direction.FORWARD )
@@ -55,8 +57,10 @@ public class SensorController extends Thread {
                 );
             }
 
+            distance += ultrasonicSensor.getDistance() * 0.6;
+
             HybridAgent.instance.enqueuePercept(
-                    new UltrasoundPercept( ultrasonicSensor.getDistance(), platformRotation )
+                    new UltrasoundPercept( (int) distance, platformRotation )
             );
 
             if ( lastRotation >= 0 ) {

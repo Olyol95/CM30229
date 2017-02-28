@@ -20,8 +20,8 @@ public class ProactiveLayer extends Layer {
 
     public ProactiveLayer() {
         reactionBounds.put( Direction.FORWARD, 40 );
-        reactionBounds.put( Direction.LEFT, 40 );
-        reactionBounds.put( Direction.RIGHT, 40 );
+        reactionBounds.put( Direction.LEFT, 45 );
+        reactionBounds.put( Direction.RIGHT, 45 );
         reactionBounds.put( Direction.BACKWARD, 50 );
         model = new HashMap<>();
         for ( Direction direction : Direction.values() ) {
@@ -74,8 +74,8 @@ public class ProactiveLayer extends Layer {
                             }
                         }
                     }
-                    MotorController.left( MotorController.MAX_SPEED / 2 );
-                    MotorController.right( MotorController.MAX_SPEED / 2 );
+                    MotorController.left( MotorController.MAX_SPEED / 3 );
+                    MotorController.right( MotorController.MAX_SPEED / 3 );
                 }
         } else {
             wait -= SensorController.PERCEPT_FREQUENCY;
