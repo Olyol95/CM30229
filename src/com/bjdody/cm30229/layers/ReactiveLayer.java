@@ -14,9 +14,9 @@ import lejos.nxt.Sound;
 public class ReactiveLayer extends Layer {
 
     public ReactiveLayer() {
-        reactionBounds.put( Direction.FORWARD, 25 );
-        reactionBounds.put( Direction.LEFT, 20 );
-        reactionBounds.put( Direction.RIGHT, 20 );
+        reactionBounds.put( Direction.FORWARD, 30 );
+        reactionBounds.put( Direction.LEFT, 25 );
+        reactionBounds.put( Direction.RIGHT, 25 );
         reactionBounds.put( Direction.BACKWARD, 35 );
     }
 
@@ -83,7 +83,28 @@ public class ReactiveLayer extends Layer {
     }
 
     private void handleBumpPercept( BumpPercept percept ) {
-
+        int avoidanceSpeed = calculateAvoidanceSpeed( percept.getDirection(), 0 );
+        switch ( percept.getDirection() ) {
+            case FORWARD:
+                MotorController.left( -avoidanceSpeed );
+                MotorController.right( -avoidanceSpeed );
+                break;
+            case LEFT:
+                MotorController.right( -avoidanceSpeed / 2 );
+                MotorController.left( avoidanceSpeed / 2 );
+                break;
+            case RIGHT:
+                MotorController.right( avoidanceSpeed / 2 );
+                MotorController.left( -avoidanceSpeed / 2 );
+                break;
+        }
+        setWait( SensorController.PERCEPT_FREQUENCY * 2 );
+        percept.setHandled( true );
     }
 
+    @Override
+    protected void setWait( int ms ) {
+        super.setWait( ms );
+        getParentLayer().setWait( ms );
+    }
 }
