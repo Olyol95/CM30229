@@ -1,4 +1,7 @@
-package com.bjdody.cm30229;
+package com.bjdody.cm30229.Controllers;
+
+import com.bjdody.cm30229.BotControls;
+import com.bjdody.cm30229.Utility;
 
 /**
  * Created by Benjamin on 20/02/2017.

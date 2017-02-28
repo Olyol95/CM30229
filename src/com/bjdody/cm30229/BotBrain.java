@@ -1,5 +1,8 @@
 package com.bjdody.cm30229;
 
+import com.bjdody.cm30229.Controllers.TouchSensorController;
+import com.bjdody.cm30229.Controllers.VisibilitySensorController;
+
 import java.util.HashMap;
 
 /**
