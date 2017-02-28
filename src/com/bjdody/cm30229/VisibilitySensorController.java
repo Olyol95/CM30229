@@ -53,6 +53,7 @@ public class VisibilitySensorController extends Thread{
         {
             switch (Mode)
             {
+                //Left, Forward, Right, Forward....
                 case Forward:
                 {
                     left_scan = Scan(-Scanability);
@@ -61,6 +62,8 @@ public class VisibilitySensorController extends Thread{
                     front_scan = Scan(0);
                     break;
                 }
+                //Left, Forward, Left, Forward, Left, Forward, Left, Forward, Right
+                //We scan once right just so we can adjust in case we're very close to the right wall
                 case Left:
                 {
                     left_scan = Scan(-Scanability);
@@ -74,6 +77,8 @@ public class VisibilitySensorController extends Thread{
                     right_scan = Scan(Scanability);
                     break;
                 }
+                //Right, Forward, Right, Forward, Right, Forward, Right, Forward, Left
+                //We scan once left just so we can adjust in case we're very close to the left wall
                 case Right:
                 {
                     right_scan = Scan(Scanability);
