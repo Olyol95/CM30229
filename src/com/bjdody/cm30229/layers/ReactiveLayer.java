@@ -43,7 +43,7 @@ public class ReactiveLayer extends Layer {
     private void handleUltrasoundPercept( UltrasoundPercept percept ) {
         Direction direction = Direction.fromRotation( percept.getRotation() );
         if ( percept.getDistance() <= reactionBounds.get( direction ) ) {
-            Sound.playTone( 500, 300 );
+            //Sound.playTone( 500, 300 );
             int avoidanceSpeed = calculateAvoidanceSpeed( direction, percept.getDistance() );
             switch ( direction ) {
                 case FORWARD:
@@ -51,24 +51,10 @@ public class ReactiveLayer extends Layer {
                     MotorController.right( -avoidanceSpeed );
                     break;
                 case LEFT:
-                    //MotorController.left( -avoidanceSpeed );
-                    //MotorController.right( -avoidanceSpeed );
-                    /*try {
-                        Thread.sleep( SensorController.PERCEPT_FREQUENCY );
-                    } catch ( InterruptedException e ) {
-                        //do nothing
-                    }*/
                     MotorController.right( -avoidanceSpeed / 2 );
                     MotorController.left( avoidanceSpeed / 2 );
                     break;
                 case RIGHT:
-                    //MotorController.left( -avoidanceSpeed );
-                    //MotorController.right( -avoidanceSpeed );
-                    /*try {
-                        Thread.sleep( SensorController.PERCEPT_FREQUENCY );
-                    } catch ( InterruptedException e ) {
-                        //do nothing
-                    }*/
                     MotorController.right( avoidanceSpeed / 2 );
                     MotorController.left( -avoidanceSpeed / 2 );
                     break;
@@ -92,7 +78,7 @@ public class ReactiveLayer extends Layer {
                 MotorController.right( -avoidanceSpeed );
                 break;
         }
-        setWait( SensorController.PERCEPT_FREQUENCY * 4 );
+        setWait( SensorController.PERCEPT_FREQUENCY * 2 );
         percept.setHandled( true );
     }
 

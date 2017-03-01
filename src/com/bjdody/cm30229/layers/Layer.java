@@ -40,7 +40,7 @@ public abstract class Layer {
                 (-MotorController.MAX_SPEED / reactionBound )
                     * ( distance - reactionBound )
                     + ( MotorController.MAX_SPEED / 4 ),
-                MotorController.MAX_SPEED * 0.75
+                MotorController.MAX_SPEED * 0.5
         );
     }
 

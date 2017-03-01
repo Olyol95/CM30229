@@ -41,7 +41,7 @@ public class ProactiveLayer extends Layer {
                 int backDistance    = model.get( Direction.BACKWARD );
 
                 if ( forwardDistance <= reactionBounds.get( Direction.FORWARD ) ) {
-                    Sound.playTone( 360, 300 );
+                    //Sound.playTone( 360, 300 );
                     if ( leftDistance <= reactionBounds.get( Direction.LEFT ) ) {
                         int avoidanceSpeed = calculateAvoidanceSpeed( Direction.LEFT, leftDistance );
                         MotorController.left( avoidanceSpeed );

@@ -15,9 +15,9 @@ import lejos.robotics.RegulatedMotor;
  */
 public class SensorController extends Thread {
 
-    public static final int MAX_ROTATION_ANGLE = 50,
+    public static final int MAX_ROTATION_ANGLE = 60,
                             PERCEPT_FREQUENCY  = 20,
-                            ROTATION_STEP      = 50;
+                            ROTATION_STEP      = 60;
 
     private UltrasonicSensor ultrasonicSensor;
     private TouchSensor leftTouchSensor, rightTouchSensor;
@@ -42,7 +42,7 @@ public class SensorController extends Thread {
 
     @Override
     public void run() {
-        long rotations = 0L;
+        byte rotations = 0;
         isActive = true;
         while ( isActive ) {
             double distance = ultrasonicSensor.getDistance() * 0.4;
@@ -75,7 +75,12 @@ public class SensorController extends Thread {
                         rotateSensor( -ROTATION_STEP );
                     }
                 } else {
-                    rotateSensor( -ROTATION_STEP );
+                    if ( wallDirection == Direction.LEFT && platformRotation > 0 ) {
+                        rotateSensor( -ROTATION_STEP * 2 );
+                        rotations = 0;
+                    } else {
+                        rotateSensor( -ROTATION_STEP );
+                    }
                 }
             } else {
                 if ( Math.abs( platformRotation - ROTATION_STEP ) <= MAX_ROTATION_ANGLE ) {
@@ -85,7 +90,12 @@ public class SensorController extends Thread {
                         rotateSensor( ROTATION_STEP );
                     }
                 } else {
-                    rotateSensor( ROTATION_STEP );
+                    if ( wallDirection == Direction.RIGHT && platformRotation < 0 ) {
+                        rotateSensor( ROTATION_STEP * 2 );
+                        rotations = 0;
+                    } else {
+                        rotateSensor( ROTATION_STEP );
+                    }
                 }
             }
             rotations++;
