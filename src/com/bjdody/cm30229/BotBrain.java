@@ -74,13 +74,13 @@ public class BotBrain {
         for (Direction direction : Direction.values())
         {
             RangeBound.DETECT.putRange(direction, 65);
-            RangeBound.TOOFAR.putRange(direction, 35);
+            RangeBound.TOOFAR.putRange(direction, 40);
             RangeBound.ULTRACLOSE.putRange(direction, 15);
         }
 
         RangeBound.TOOCLOSE.putRange(Direction.FORWARD, 30);
-        RangeBound.TOOCLOSE.putRange(Direction.LEFT, 30);
-        RangeBound.TOOCLOSE.putRange(Direction.RIGHT, 30);
+        RangeBound.TOOCLOSE.putRange(Direction.LEFT, 27);
+        RangeBound.TOOCLOSE.putRange(Direction.RIGHT, 27);
         RangeBound.TOOCLOSE.putRange(Direction.BACKWARD, 40);
 
         OnEnter();
@@ -280,7 +280,13 @@ public class BotBrain {
             long DeltaTimeOfWallFind = System.currentTimeMillis() - TimeOfLastWallFind;
             if (DeltaTimeOfWallFind < MillTimeToForget)
             {
-                Controls.Move(0.5f * move_scalar, 1.0f * move_scalar);
+                if (left > RangeBound.DETECT.getRange(Direction.LEFT)) {
+                    Controls.Move(0.45f * move_scalar, 1.0f * move_scalar);
+                }
+                else
+                {
+                    Controls.Move(0.6f * move_scalar, 1.0f * move_scalar);
+                }
             }
             else
             {
@@ -323,7 +329,14 @@ public class BotBrain {
             long DeltaTimeOfWallFind = System.currentTimeMillis() - TimeOfLastWallFind;
             if (DeltaTimeOfWallFind < MillTimeToForget)
             {
-                Controls.Move(1.0f * move_scalar, 0.5f * move_scalar);
+                if (right > RangeBound.DETECT.getRange(Direction.RIGHT))
+                {
+                    Controls.Move(1.0f * move_scalar, 0.45f * move_scalar);
+                }
+                else
+                {
+                    Controls.Move(1.0f * move_scalar, 0.6f * move_scalar);
+                }
             }
             else
             {

@@ -21,7 +21,7 @@ public class BotControls {
     private static final int LightLevelBound = 90;
     private static final int SenseDelay = 10;
     
-    private static final int MaxWheelSpeed  = 360;
+    private static final int MaxWheelSpeed  = 300;
     private static final int MaxSensorSpeed = 900;
 
     public BotControls()
