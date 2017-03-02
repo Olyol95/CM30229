@@ -23,6 +23,7 @@ public class VisibilitySensorController extends Thread{
     private int front_scan = 255;
     private int back_scan = 255;
 
+    private static final int Scanability = 60;
 
     public VisibilitySensorController(BotControls in_controls)
     {
@@ -45,8 +46,6 @@ public class VisibilitySensorController extends Thread{
     {
         Mode = in_mode;
     }
-
-    private static final int Scanability = 70;
 
     @Override
     public void run()

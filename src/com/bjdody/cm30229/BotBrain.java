@@ -74,13 +74,13 @@ public class BotBrain {
         for (Direction direction : Direction.values())
         {
             RangeBound.DETECT.putRange(direction, 65);
-            RangeBound.TOOFAR.putRange(direction, 40);
+            RangeBound.TOOFAR.putRange(direction, 35);
             RangeBound.ULTRACLOSE.putRange(direction, 15);
         }
 
         RangeBound.TOOCLOSE.putRange(Direction.FORWARD, 30);
-        RangeBound.TOOCLOSE.putRange(Direction.LEFT, 27);
-        RangeBound.TOOCLOSE.putRange(Direction.RIGHT, 27);
+        RangeBound.TOOCLOSE.putRange(Direction.LEFT, 25);
+        RangeBound.TOOCLOSE.putRange(Direction.RIGHT, 25);
         RangeBound.TOOCLOSE.putRange(Direction.BACKWARD, 40);
 
         OnEnter();
