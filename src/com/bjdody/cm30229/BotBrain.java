@@ -54,7 +54,7 @@ public class BotBrain {
         }
     }
 
-    private static final int MillTimeToForget = 6000;
+    private static final int MillTimeToForget = 30000;
 
     private BotState State;
     private Direction LastSideWallFound;
@@ -79,8 +79,8 @@ public class BotBrain {
         }
 
         RangeBound.TOOCLOSE.putRange(Direction.FORWARD, 30);
-        RangeBound.TOOCLOSE.putRange(Direction.LEFT, 25);
-        RangeBound.TOOCLOSE.putRange(Direction.RIGHT, 25);
+        RangeBound.TOOCLOSE.putRange(Direction.LEFT, 27);
+        RangeBound.TOOCLOSE.putRange(Direction.RIGHT, 27);
         RangeBound.TOOCLOSE.putRange(Direction.BACKWARD, 40);
 
         OnEnter();
